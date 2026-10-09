@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Wave</title>
+    <style>
+      :root {
+        --bg1: #08111d;
+        --bg2: #101d2d;
+        --bg3: #162d45;
+        --panel: rgba(10, 18, 32, 0.72);
+        --panel-border: rgba(148, 163, 184, 0.2);
+        --text: #eaf6ff;
+        --cyan: #67e8f9;
+        --blue: #60a5fa;
+        --pink: #f472b6;
+        --purple: #a78bfa;
+        --green: #34d399;
+        --yellow: #facc15;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(circle at top, rgba(103, 232, 249, 0.12), transparent 28%),
+          linear-gradient(180deg, var(--bg1), var(--bg2), var(--bg3));
+        color: var(--text);
+      }
+
+      .shell {
+        width: min(92vw, 980px);
+        padding: 20px 20px 14px;
+        border-radius: 28px;
+        background: rgba(8, 17, 29, 0.7);
+        border: 1px solid var(--panel-border);
+        box-shadow: 0 26px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+        gap: 16px;
+      }
+
+      .brand {
+        font-weight: 900;
+        font-size: clamp(1rem, 2vw, 1.5rem);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #fef3c7;
+        text-shadow: 0 0 18px rgba(250, 204, 21, 0.6);
+      }
+
+      .stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        min-width: 110px;
+        padding: 9px 12px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.72));
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 14px;
+        text-align: center;
+      }
+
+      .stat-label {
+        display: block;
+        color: rgba(234, 246, 255, 0.72);
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .stat-value {
+        display: block;
+        margin-top: 4px;
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: #e0f2fe;
+      }
+
+      .shop {
+        margin-top: 12px;
+        border-radius: 22px;
+        padding: 14px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(12, 18, 31, 0.92));
+        border: 1px solid rgba(103, 232, 249, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 30px rgba(2, 8, 23, 0.25);
+      }
+
+      .world-panel {
+        margin: 0 0 12px;
+        padding: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.62);
+      }
+
+      .world-panel-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 9px;
+        color: #dbeafe;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .world-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .world-button {
+        min-width: 0;
+        padding: 9px 8px;
+        border: 1px solid rgba(148, 163, 184, 0.26);
+        border-radius: 9px;
+        color: var(--text);
+        background: rgba(15, 23, 42, 0.88);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .world-button strong,
+      .world-button span {
+        display: block;
+        overflow-wrap: anywhere;
+      }
+
+      .world-button strong {
+        font-size: 0.78rem;
+      }
+
+      .world-button span {
+        margin-top: 3px;
+        color: rgba(234, 246, 255, 0.66);
+        font-size: 0.65rem;
+      }
+
+      .world-button.selected {
+        border-color: var(--world-accent, #67e8f9);
+        box-shadow: inset 0 0 0 1px var(--world-accent, #67e8f9);
+      }
+
+      .world-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .promo-code {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 12px;
+        padding: 12px 14px;
+        border: 1px solid rgba(52, 211, 153, 0.24);
+        border-radius: 14px;
+        background: rgba(6, 24, 29, 0.72);
+      }
+
+      .promo-copy strong {
+        display: block;
+        color: #a7f3d0;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      .promo-copy span,
+      .promo-status {
+        color: rgba(234, 246, 255, 0.72);
+        font-size: 0.72rem;
+      }
+
+      .promo-form {
+        display: flex;
+        gap: 8px;
+      }
+
+      .promo-form input,
+      .promo-form button {
+        min-height: 38px;
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 8px;
+        font: inherit;
+      }
+
+      .promo-form input {
+        width: 120px;
+        padding: 0 10px;
+        color: var(--text);
+        background: rgba(15, 23, 42, 0.9);
+        text-transform: uppercase;
+      }
+
+      .promo-form button {
+        padding: 0 14px;
+        border-color: rgba(52, 211, 153, 0.45);
+        color: #052e27;
+        background: #6ee7b7;
+        font-size: 0.75rem;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .promo-form button:disabled {
+        opacity: 0.65;
+        cursor: default;
+      }
+
+      @media (max-width: 600px) {
+        .world-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .promo-code {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .promo-form input {
+          flex: 1;
+          width: auto;
+          min-width: 0;
+        }
+      }
+
+      .shop-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-size: 0.76rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #dbeafe;
+      }
+
+      .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+      }
+
+      .trail-card {
+        position: relative;
+        padding: 10px 10px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(17, 24, 39, 0.82));
+        color: var(--text);
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      }
+
+      .trail-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(103, 232, 249, 0.7);
+        box-shadow: 0 12px 22px rgba(12, 18, 31, 0.3);
+      }
+
+      .trail-card.selected {
+        border-color: rgba(250, 204, 21, 0.8);
+        box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.4), 0 12px 22px rgba(250, 204, 21, 0.08);
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(17, 24, 39, 0.86));
+      }
+
+      .trail-card.locked {
+        opacity: 0.72;
+      }
+
+      .trail-preview {
+        height: 46px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.88));
+        position: relative;
+        overflow: hidden;
+      }
+
+      .trail-card h4 {
+        margin: 0 0 4px 0;
+        font-size: 0.94rem;
+        font-weight: 800;
+      }
+
+      .trail-card p {
+        margin: 0;
+        font-size: 0.7rem;
+        color: rgba(234, 246, 255, 0.76);
+      }
+
+      .trail-price {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(250, 204, 21, 0.14);
+        color: #fef3c7;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 22px;
+        border: 3px solid rgba(148, 163, 184, 0.28);
+        background: linear-gradient(180deg, #08111d 0%, #13263d 38%, #122b50 100%);
+        box-shadow: inset 0 0 0 1px rgba(103, 232, 249, 0.15), 0 20px 36px rgba(2, 8, 23, 0.2);
+        cursor: crosshair;
+      }
+
+      .hint {
+        text-align: center;
+        color: rgba(234, 246, 255, 0.8);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        margin-top: 12px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">Geometry Wave</div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Hisob</span>
+            <span class="stat-value" id="score">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Rekord</span>
+            <span class="stat-value" id="best">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Yuraklar</span>
+            <span class="stat-value" id="hearts-display">❤❤❤</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Kuboklar</span>
+            <span class="stat-value" id="trophies-display">0</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="world-panel" aria-label="World selection">
+        <div class="world-panel-header">
+          <span>Dunyolar</span>
+          <span id="world-status">Oddiy dunyo | Maqsad: 5,000</span>
+        </div>
+        <div class="world-grid" id="world-grid"></div>
+      </section>
+      <canvas id="gameCanvas" width="920" height="540" aria-label="Geometry Wave o‘yini"></canvas>
+      <section class="promo-code" aria-label="Promokod">
+        <div class="promo-copy">
+          <strong>Promokod</strong>
+          <span>Maxsus imkoniyatni oching</span>
+          <div class="promo-status" id="promo-status" role="status" aria-live="polite"></div>
+          <div class="promo-status" id="heaven-code-display" hidden>Jannat mukofoti kodi: HEAVEN</div>
+        </div>
+        <form class="promo-form" id="promo-form">
+          <input id="promo-input" type="text" maxlength="6" placeholder="KOD" aria-label="Promokodni kiriting" autocomplete="off" spellcheck="false" />
+          <button id="promo-submit" type="submit">Faollashtirish</button>
+        </form>
+      </section>
+      <div class="shop">
+        <div class="shop-title">
+          <span>Izlar do‘koni</span>
+          <span id="crystal-display">Kristallar: 0</span>
+        </div>
+        <div class="shop-grid" id="shop-grid"></div>
+      </div>
+      <div class="hint">Sichqoncha, WASD yoki strelkalar bilan harakatlaning</div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const scoreEl = document.getElementById('score');
+      const bestEl = document.getElementById('best');
+      const heartsDisplay = document.getElementById('hearts-display');
+      const trophiesDisplay = document.getElementById('trophies-display');
+      const crystalDisplay = document.getElementById('crystal-display');
+      const shopGrid = document.getElementById('shop-grid');
+      const promoForm = document.getElementById('promo-form');
+      const promoInput = document.getElementById('promo-input');
+      const promoSubmit = document.getElementById('promo-submit');
+      const promoStatus = document.getElementById('promo-status');
+      const worldGrid = document.getElementById('world-grid');
+      const worldStatus = document.getElementById('world-status');
+      const heavenCodeDisplay = document.getElementById('heaven-code-display');
+
+      const GAME_WIDTH = canvas.width;
+      const GAME_HEIGHT = canvas.height;
+      const worlds = [
+        {
+          id: 'overworld', name: 'Oddiy dunyo', goal: 5000, trophiesRequired: 0,
+          sky: ['#08111d', '#10263d', '#122b50'], accent: '#67e8f9',
+          obstacles: [{ fill: '#ff6b6b', stroke: '#ef4444' }, { fill: '#fbbf24', stroke: '#f59e0b' }, { fill: '#60a5fa', stroke: '#2563eb' }],
+        },
+        {
+          id: 'nether', name: 'Nether olami', goal: 10000, trophiesRequired: 1,
+          sky: ['#170309', '#7f1020', '#d83224'], accent: '#ff593f',
+          obstacles: [{ fill: '#ff6847', stroke: '#c83225' }, { fill: '#ffad42', stroke: '#e35d20' }, { fill: '#a92132', stroke: '#f05252' }],
+        },
+        {
+          id: 'end', name: 'Oxir olami', goal: 15000, trophiesRequired: 2,
+          sky: ['#10051f', '#6b1388', '#c51b66'], accent: '#ff3bd4',
+          obstacles: [{ fill: '#bd8cff', stroke: '#7545c2' }, { fill: '#ef83d2', stroke: '#b44293' }, { fill: '#8de0cf', stroke: '#4b9c8e' }],
+        },
+        {
+          id: 'heaven', name: 'Jannat', goal: 25000, trophiesRequired: 3,
+          sky: ['#fffdf0', '#fff1ad', '#f5c94d'], accent: '#fff8cc',
+          obstacles: [{ fill: '#fff0a6', stroke: '#e4a942' }, { fill: '#ffb8c5', stroke: '#d66b83' }, { fill: '#a8d9ff', stroke: '#5d9fce' }],
+        },
+      ];
+
+      const trailOptions = [
+        {
+          id: 'none',
+          name: 'Oddiy',
+          price: 0,
+          color: '#67e8f9',
+          accent: '#60a5fa',
+          preview: 'solid',
+        },
+        {
+          id: 'nova',
+          name: 'Nova',
+          price: 25,
+          color: '#f472b6',
+          accent: '#facc15',
+          preview: 'spark',
+        },
+        {
+          id: 'plasma',
+          name: 'Plasma',
+          price: 60,
+          color: '#a78bfa',
+          accent: '#67e8f9',
+          preview: 'wave',
+        },
+        {
+          id: 'ember',
+          name: 'Ember',
+          price: 120,
+          color: '#f97316',
+          accent: '#facc15',
+          preview: 'flare',
+        },
+        {
+          id: 'mint',
+          name: 'Mint',
+          price: 180,
+          color: '#34d399',
+          accent: '#67e8f9',
+          preview: 'drift',
+        },
+      ];
+
+      const upgradeDefs = {
+        heart: { name: 'Yurak', price: 40, maxLevel: 3, apply: (lvl) => ({ hearts: lvl }) },
+        slow: { name: 'Sekin to‘siqlar', price: 55, maxLevel: 3, apply: (lvl) => ({ obstacleSlow: lvl }) },
+        magnet: { name: 'Magnit', price: 70, maxLevel: 3, apply: (lvl) => ({ magnetRange: 30 + lvl * 22 }) },
+      };
+
+      const savedData = JSON.parse(localStorage.getItem('geometry-wave-save') || '{}');
+      const state = {
+        running: false,
+        gameOver: false,
+        score: 0,
+        best: Number(localStorage.getItem('geometry-wave-best')) || 0,
+        crystals: Number(savedData.crystals) || 0,
+        redeemedPromos: savedData.redeemedPromos || [],
+        trophies: Number(savedData.trophies) || 0,
+        immortal: savedData.immortal === true,
+        selectedWorld: savedData.selectedWorld || 'overworld',
+        heavenCodeUnlocked: savedData.heavenCodeUnlocked === true,
+        unlockedTrails: savedData.unlockedTrails || ['none'],
+        selectedTrail: savedData.selectedTrail || 'none',
+        upgrades: savedData.upgrades || { heart: 0, slow: 0, magnet: 0 },
+        hearts: Number(savedData.hearts) || 1,
+        speed: 5.5,
+        spawnTimer: 0,
+        lastTime: 0,
+        crystalTimer: 0,
+        hitFlash: 0,
+      };
+
+      const keys = {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+      };
+
+      const player = {
+        x: 180,
+        y: GAME_HEIGHT / 2,
+        radius: 24,
+        targetY: GAME_HEIGHT / 2,
+        velocityY: 0,
+      };
+
+      const obstacles = [];
+      const crystals = [];
+      const trailParticles = [];
+
+      function persistSave() {
+        const payload = {
+          crystals: state.crystals,
+          redeemedPromos: state.redeemedPromos,
+          trophies: state.trophies,
+          immortal: state.immortal,
+          selectedWorld: state.selectedWorld,
+          heavenCodeUnlocked: state.heavenCodeUnlocked,
+          unlockedTrails: state.unlockedTrails,
+          selectedTrail: state.selectedTrail,
+          upgrades: state.upgrades,
+          hearts: state.hearts,
+        };
+        localStorage.setItem('geometry-wave-save', JSON.stringify(payload));
+      }
+
+      function updateUI() {
+        const world = getCurrentWorld();
+        scoreEl.textContent = Math.floor(state.score);
+        bestEl.textContent = Math.floor(state.best);
+        heartsDisplay.textContent = state.immortal ? 'O‘LMAS' : '❤'.repeat(Math.max(1, state.hearts));
+        trophiesDisplay.textContent = state.trophies;
+        crystalDisplay.textContent = `Kristallar: ${state.crystals}`;
+        worldStatus.textContent = `${world.name} | Maqsad: ${world.goal.toLocaleString()}`;
+      }
+
+      function getCurrentWorld() {
+        return worlds.find((world) => world.id === state.selectedWorld) || worlds[0];
+      }
+
+      function renderWorlds() {
+        worldGrid.innerHTML = '';
+        for (const world of worlds) {
+          const unlocked = state.trophies >= world.trophiesRequired;
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `world-button ${state.selectedWorld === world.id ? 'selected' : ''}`;
+          button.style.setProperty('--world-accent', world.accent);
+          button.disabled = !unlocked || state.running;
+          button.setAttribute('aria-pressed', String(state.selectedWorld === world.id));
+
+          const name = document.createElement('strong');
+          name.textContent = world.name;
+          const detail = document.createElement('span');
+          detail.textContent = unlocked
+            ? `Maqsad: ${world.goal.toLocaleString()}`
+            : `${world.trophiesRequired} ta kubok bilan ochiladi`;
+          button.append(name, detail);
+          button.addEventListener('click', () => {
+            if (!unlocked || state.running) return;
+            state.selectedWorld = world.id;
+            persistSave();
+            updateUI();
+            renderWorlds();
+          });
+          worldGrid.appendChild(button);
+        }
+      }
+
+      function resetGame() {
+        obstacles.length = 0;
+        crystals.length = 0;
+        trailParticles.length = 0;
+        state.running = false;
+        state.gameOver = false;
+        state.won = false;
+        state.score = 0;
+        state.speed = 5.5;
+        state.spawnTimer = 0;
+        state.crystalTimer = 0;
+        player.y = GAME_HEIGHT / 2;
+        player.targetY = GAME_HEIGHT / 2;
+        player.velocityY = 0;
+        updateUI();
+        renderWorlds();
+      }
+
+      function startGame() {
+        if (state.gameOver) {
+          resetGame();
+        }
+        state.running = true;
+        renderWorlds();
+      }
+
+      function randomRange(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function createObstacle() {
+        const kinds = ['triangle', 'square', 'diamond', 'hex', 'circle'];
+        const kind = kinds[Math.floor(Math.random() * kinds.length)];
+        const size = randomRange(20, 42);
+        const y = randomRange(80, GAME_HEIGHT - 80);
+        const drift = randomRange(-0.9, 0.9);
+        const palette = getCurrentWorld().obstacles;
+        const colorSet = palette[Math.floor(Math.random() * palette.length)];
+
+        obstacles.push({
+          kind,
+          x: GAME_WIDTH + size + 30,
+          y,
+          size,
+          drift,
+          phase: Math.random() * Math.PI * 2,
+          rotation: Math.random() * Math.PI,
+          pulse: randomRange(0.8, 1.8),
+          fill: colorSet.fill,
+          stroke: colorSet.stroke,
+        });
+      }
+
+      function createCrystal() {
+        crystals.push({
+          x: GAME_WIDTH + 60,
+          y: randomRange(90, GAME_HEIGHT - 90),
+          radius: 10,
+          bob: Math.random() * Math.PI * 2,
+          value: 1,
+        });
+      }
+
+      function addTrailParticles() {
+        const trail = trailOptions.find((option) => option.id === state.selectedTrail) || trailOptions[0];
+        trailParticles.push({
+          x: player.x - 32,
+          y: player.y + randomRange(-8, 8),
+          vx: randomRange(-1.5, -0.5),
+          vy: randomRange(-1.2, 1.2),
+          radius: randomRange(3, 7),
+          life: 35,
+          color: trail.color,
+          accent: trail.accent,
+        });
+      }
+
+      function handleInput() {
+        if (keys.up) player.targetY -= 7;
+        if (keys.down) player.targetY += 7;
+        if (keys.left) player.targetY -= 4;
+        if (keys.right) player.targetY += 4;
+
+        player.targetY = Math.max(48, Math.min(GAME_HEIGHT - 48, player.targetY));
+      }
+
+      function spawnTrailFromCurrentTrail() {
+        const currentTrail = trailOptions.find((option) => option.id === state.selectedTrail) || trailOptions[0];
+
+        for (let i = 0; i < 4; i++) {
+          trailParticles.push({
+            x: player.x - 22 - i * 4,
+            y: player.y + randomRange(-10, 10),
+            vx: randomRange(-2.2, -0.4),
+            vy: randomRange(-1.6, 1.6),
+            radius: randomRange(4, 8),
+            life: 24 + i * 5,
+            color: currentTrail.color,
+            accent: currentTrail.accent,
+          });
+        }
+      }
+
+      function update(dt) {
+        if (!state.running || state.gameOver) {
+          if (!state.running) {
+            player.y += Math.sin((performance.now() * 0.003)) * 0.25;
+          }
+          return;
+        }
+
+        state.score += dt * 0.025;
+        const currentWorld = getCurrentWorld();
+        if (state.score >= currentWorld.goal) {
+          state.score = currentWorld.goal;
+          state.won = true;
+          state.running = false;
+          state.gameOver = true;
+          state.trophies += 1;
+          state.crystals += 25;
+          if (currentWorld.id === 'heaven') {
+            state.heavenCodeUnlocked = true;
+            heavenCodeDisplay.hidden = false;
+            promoStatus.textContent = 'Jannat mukofoti ochildi: o‘lmaslik uchun HEAVEN kodini kiriting.';
+          }
+          state.best = Math.max(state.best, state.score);
+          localStorage.setItem('geometry-wave-best', String(Math.floor(state.best)));
+          persistSave();
+          updateUI();
+          renderWorlds();
+          return;
+        }
+        const slowAmount = 1 - state.upgrades.slow * 0.12;
+        state.speed = Math.min(18, (5.5 + state.score * 0.06) * slowAmount);
+        if (state.upgrades.slow > 0 && Math.random() < 0.03) {
+          addSlowVisualCue();
+        }
+
+        handleInput();
+        player.velocityY += (player.targetY - player.y) * 0.08;
+        player.velocityY *= 0.82;
+        player.y += player.velocityY;
+        player.y = Math.max(26, Math.min(GAME_HEIGHT - 26, player.y));
+
+        if (Math.random() < 0.25) {
+          spawnTrailFromCurrentTrail();
+        }
+
+        state.spawnTimer += dt;
+        const spawnDelay = Math.max(520, 1200 - state.score * 7);
+        if (state.spawnTimer >= spawnDelay) {
+          createObstacle();
+          state.spawnTimer = 0;
+        }
+
+        state.crystalTimer += dt;
+        if (state.crystalTimer >= 2400) {
+          createCrystal();
+          state.crystalTimer = 0;
+        }
+
+        for (let i = trailParticles.length - 1; i >= 0; i--) {
+          const p = trailParticles[i];
+          p.x += p.vx * (dt / 16.67);
+          p.y += p.vy * (dt / 16.67);
+          p.life -= dt / 16.67;
+          if (p.life <= 0) trailParticles.splice(i, 1);
+        }
+
+        for (let i = crystals.length - 1; i >= 0; i--) {
+          const crystal = crystals[i];
+          const magnetRange = state.upgrades.magnet ? 30 + state.upgrades.magnet * 20 : 0;
+          crystal.x -= (state.speed * dt) / 16.67;
+          crystal.bob += 0.14;
+
+          const dx = player.x - crystal.x;
+          const dy = player.y - crystal.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < magnetRange) {
+            crystal.x += dx * 0.12;
+            crystal.y += dy * 0.12;
+          }
+
+          if (dist < player.radius + crystal.radius + 6) {
+            state.crystals += crystal.value;
+            crystals.splice(i, 1);
+            persistSave();
+            updateUI();
+          } else if (crystal.x < -40) {
+            crystals.splice(i, 1);
+          }
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.x -= (state.speed * dt) / 16.67;
+          obs.y += Math.sin((performance.now() * 0.0015) + obs.phase) * obs.drift * 1.5;
+          obs.rotation += 0.03 + state.speed * 0.003;
+
+          const dx = player.x - obs.x;
+          const dy = player.y - obs.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < player.radius + obs.size * 0.7) {
+            if (state.immortal) {
+              obstacles.splice(i, 1);
+              continue;
+            }
+
+            if (state.hearts > 1) {
+              state.hearts -= 1;
+              obstacles.splice(i, 1);
+              state.hitFlash = 1;
+              updateUI();
+              continue;
+            }
+
+            state.running = false;
+            state.gameOver = true;
+            state.best = Math.max(state.best, state.score);
+            localStorage.setItem('geometry-wave-best', String(Math.floor(state.best)));
+            updateUI();
+            renderWorlds();
+            break;
+          }
+
+          if (obs.x + obs.size < -100) {
+            obstacles.splice(i, 1);
+          }
+        }
+
+        if (state.score > state.best) {
+          state.best = state.score;
+          localStorage.setItem('geometry-wave-best', String(Math.floor(state.best)));
+        }
+
+        if (state.hitFlash > 0) {
+          state.hitFlash = Math.max(0, state.hitFlash - 0.02);
+        }
+
+        updateUI();
+      }
+
+      function drawBackground(now) {
+        const world = getCurrentWorld();
+        const sky = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+        sky.addColorStop(0, world.sky[0]);
+        sky.addColorStop(0.45, world.sky[1]);
+        sky.addColorStop(1, world.sky[2]);
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        ctx.strokeStyle = `${world.accent}22`;
+        ctx.lineWidth = 1;
+        for (let y = 0; y < GAME_HEIGHT; y += 34) {
+          ctx.beginPath();
+          ctx.moveTo(0, y + (Math.sin(now * 0.001 + y * 0.08) * 10));
+          ctx.lineTo(GAME_WIDTH, y + (Math.sin(now * 0.001 + y * 0.08) * 10));
+          ctx.stroke();
+        }
+
+        for (let i = 0; i < 20; i++) {
+          const x = (i * 90 + (now * 0.02) % 120) % (GAME_WIDTH + 120) - 60;
+          const y = 40 + (i * 27 % GAME_HEIGHT);
+          ctx.fillStyle = `${world.accent}10`;
+          ctx.beginPath();
+          ctx.arc(x, y, 16, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawCircle(x, y, r, fill, stroke) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      function drawDiamond(x, y, size, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size, y);
+        ctx.lineTo(x, y + size);
+        ctx.lineTo(x - size, y);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      function drawTriangle(x, y, size, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size * 0.9, y + size);
+        ctx.lineTo(x - size * 0.9, y + size);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      function drawHex(x, y, size, fill, stroke) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i - Math.PI / 2;
+          const px = x + Math.cos(angle) * size;
+          const py = y + Math.sin(angle) * size;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      function drawSquare(x, y, size, fill, stroke) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = fill;
+        ctx.fillRect(-size, -size, size * 2, size * 2);
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-size, -size, size * 2, size * 2);
+        ctx.restore();
+      }
+
+      function drawObstacle(obs) {
+        ctx.save();
+        ctx.translate(obs.x, obs.y);
+        ctx.rotate(obs.rotation);
+
+        if (obs.kind === 'circle') {
+          drawCircle(0, 0, obs.size, obs.fill, obs.stroke);
+        } else if (obs.kind === 'diamond') {
+          drawDiamond(0, 0, obs.size, obs.fill, obs.stroke);
+        } else if (obs.kind === 'triangle') {
+          drawTriangle(0, 0, obs.size, obs.fill, obs.stroke);
+        } else if (obs.kind === 'hex') {
+          drawHex(0, 0, obs.size, obs.fill, obs.stroke);
+        } else {
+          drawSquare(0, 0, obs.size, obs.fill, obs.stroke);
+        }
+
+        ctx.restore();
+      }
+
+      function drawCrystal(crystal) {
+        ctx.save();
+        ctx.translate(crystal.x, crystal.y + Math.sin(crystal.bob) * 5);
+        ctx.rotate(crystal.bob);
+
+        ctx.strokeStyle = '#fef3c7';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -12);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(0, 12);
+        ctx.lineTo(-10, 0);
+        ctx.closePath();
+        ctx.fillStyle = '#67e8f9';
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, -12);
+        ctx.lineTo(0, 12);
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(10, 0);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawTrailParticles() {
+        for (const p of trailParticles) {
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life / 35);
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function drawPlayer() {
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.rotate(Math.sin(performance.now() * 0.01) * 0.35);
+
+        ctx.shadowColor = '#67e8f9';
+        ctx.shadowBlur = 30;
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.lineTo(18, 10);
+        ctx.lineTo(0, 18);
+        ctx.lineTo(-18, 10);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#67e8f9';
+        ctx.beginPath();
+        ctx.moveTo(-8, 6);
+        ctx.lineTo(0, -12);
+        ctx.lineTo(8, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawStartScreen() {
+        ctx.fillStyle = 'rgba(8, 17, 29, 0.35)';
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '900 54px Segoe UI';
+        ctx.fillText('GEOMETRY WAVE', GAME_WIDTH / 2, 220);
+
+        ctx.font = '700 24px Segoe UI';
+        ctx.fillText('Sichqoncha yoki klaviatura bilan harakatlaning', GAME_WIDTH / 2, 270);
+        ctx.fillText('Boshlash uchun istalgan tugmani bosing', GAME_WIDTH / 2, 305);
+      }
+
+      function drawGameOverScreen() {
+        ctx.fillStyle = 'rgba(8, 17, 29, 0.44)';
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = state.won ? '#facc15' : '#fef3c7';
+        ctx.font = '900 52px Segoe UI';
+        ctx.fillText(state.won ? 'G‘ALABA!' : 'O‘YIN TUGADI', GAME_WIDTH / 2, 215);
+
+        ctx.font = '700 28px Segoe UI';
+        ctx.fillText(`Hisob: ${Math.floor(state.score)}`, GAME_WIDTH / 2, 270);
+        ctx.fillText(`Rekord: ${Math.floor(state.best)}`, GAME_WIDTH / 2, 308);
+
+        ctx.font = '700 20px Segoe UI';
+        ctx.fillText(state.won ? `Mukofot: 1 ta kubok + 25 ta kristall | ${getCurrentWorld().name}` : 'Qayta boshlash uchun bosing yoki probelni bosing', GAME_WIDTH / 2, 350);
+        if (state.won) {
+          ctx.fillText('Yana o‘ynash uchun bosing yoki probelni bosing', GAME_WIDTH / 2, 382);
+          if (getCurrentWorld().id === 'heaven') {
+            ctx.fillText('O‘lmaslik promokodi: HEAVEN', GAME_WIDTH / 2, 414);
+          }
+        }
+      }
+
+      function draw() {
+        const now = performance.now();
+        drawBackground(now);
+
+        for (const obstacle of obstacles) {
+          drawObstacle(obstacle);
+        }
+
+        for (const crystal of crystals) {
+          drawCrystal(crystal);
+        }
+
+        drawTrailParticles();
+        drawPlayer();
+
+        if (!state.running && !state.gameOver) {
+          drawStartScreen();
+        }
+
+        if (state.gameOver) {
+          drawGameOverScreen();
+        }
+      }
+
+      function buyUpgrade(type) {
+        const upgrade = upgradeDefs[type];
+        const level = state.upgrades[type] || 0;
+        if (level >= upgrade.maxLevel) return;
+
+        const cost = upgrade.price + level * 25;
+        if (state.crystals < cost) return;
+
+        state.crystals -= cost;
+        state.upgrades[type] = level + 1;
+        if (type === 'heart') {
+          state.hearts = Math.min(5, state.hearts + 1);
+        }
+        persistSave();
+        renderShop();
+        updateUI();
+      }
+
+      promoForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const code = promoInput.value.trim().toUpperCase();
+        if (code === 'HEAVEN' && !state.heavenCodeUnlocked) {
+          promoStatus.textContent = 'Bu kodni ochish uchun Jannat dunyosida g‘alaba qozoning.';
+          return;
+        }
+
+        if (code === 'CR7' || code === 'CR77') {
+          if (state.redeemedPromos.includes(code)) {
+            promoStatus.textContent = 'Bu promokod avval ishlatilgan.';
+            return;
+          }
+
+          state.redeemedPromos.push(code);
+          state.crystals += 25;
+          persistSave();
+          updateUI();
+          renderShop();
+          promoStatus.textContent = '25 ta kristall qo‘shildi.';
+          return;
+        }
+
+        if (code === 'OG77' || (code === 'HEAVEN' && state.heavenCodeUnlocked)) {
+          state.immortal = true;
+          persistSave();
+          updateUI();
+          promoStatus.textContent = code === 'OG77' ? 'Och rejim yoqildi.' : 'O‘lmaslik rejimi yoqildi.';
+          return;
+        }
+
+        promoStatus.textContent = 'Promokod noto‘g‘ri.';
+      });
+
+      if (state.immortal) {
+        promoStatus.textContent = 'Och rejim yoqildi.';
+      }
+      if (state.heavenCodeUnlocked) {
+        heavenCodeDisplay.hidden = false;
+        if (!state.immortal) {
+          promoStatus.textContent = 'Jannat mukofoti ochildi: o‘lmaslik uchun HEAVEN kodini kiriting.';
+        }
+      }
+
+      function addSlowVisualCue() {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.left = '50%';
+        overlay.style.top = '14px';
+        overlay.style.transform = 'translateX(-50%)';
+        overlay.style.background = 'rgba(15, 23, 42, 0.78)';
+        overlay.style.border = '1px solid rgba(103, 232, 249, 0.4)';
+        overlay.style.borderRadius = '999px';
+        overlay.style.padding = '8px 14px';
+        overlay.style.color = '#dbeafe';
+        overlay.style.fontSize = '12px';
+        overlay.style.fontWeight = '800';
+        overlay.style.letterSpacing = '0.12em';
+        overlay.style.textTransform = 'uppercase';
+        overlay.style.zIndex = '20';
+        overlay.textContent = 'Sekin rejim yoqildi';
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay.remove(), 700);
+      }
+
+      function renderShop() {
+        shopGrid.innerHTML = '';
+
+        const upgradeCards = Object.entries(upgradeDefs).map(([type, upgrade]) => {
+          const row = document.createElement('div');
+          row.className = 'trail-card';
+          row.style.marginBottom = '0';
+
+          const title = document.createElement('h4');
+          title.textContent = `${upgrade.name} ${state.upgrades[type] || 0}/${upgrade.maxLevel}`;
+
+          const desc = document.createElement('p');
+          desc.textContent = type === 'heart'
+            ? 'Zarbalarga chidash uchun +1 ta yurak qo‘shadi'
+            : type === 'slow'
+              ? 'To‘siqlar tezligini pasaytiradi'
+              : 'Kristallarni o‘zingizga tortadi';
+
+          const price = document.createElement('span');
+          const level = state.upgrades[type] || 0;
+          const cost = upgrade.price + level * 25;
+          price.className = 'trail-price';
+          price.textContent = level >= upgrade.maxLevel ? 'Maksimal' : `${cost} ta kristall`;
+
+          row.appendChild(title);
+          row.appendChild(desc);
+          row.appendChild(price);
+          row.addEventListener('click', () => buyUpgrade(type));
+          return row;
+        });
+
+        for (const row of upgradeCards) {
+          shopGrid.appendChild(row);
+        }
+
+        const trailCards = trailOptions.map((trail) => {
+          const unlocked = state.unlockedTrails.includes(trail.id);
+          const selected = state.selectedTrail === trail.id;
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = `trail-card ${unlocked ? '' : 'locked'} ${selected ? 'selected' : ''}`;
+
+          const preview = document.createElement('div');
+          preview.className = 'trail-preview';
+          preview.innerHTML = '<div style="position:absolute;left:10px;right:10px;top:18px;height:4px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0), ' + trail.color + ', rgba(255,255,255,0));box-shadow:0 0 12px ' + trail.color + ';"></div>';
+
+          const title = document.createElement('h4');
+          title.textContent = trail.name;
+
+          const desc = document.createElement('p');
+          desc.textContent = unlocked ? (selected ? 'Tanlangan' : 'Sotib olingan') : 'Kristall yig‘ing';
+
+          const price = document.createElement('span');
+          price.className = 'trail-price';
+          price.textContent = unlocked ? (selected ? 'Tanlangan' : 'Sotib olingan') : `${trail.price} ta kristall`;
+
+          card.appendChild(preview);
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(price);
+
+          card.addEventListener('click', () => {
+            if (!unlocked && state.crystals >= trail.price) {
+              state.crystals -= trail.price;
+              state.unlockedTrails.push(trail.id);
+              state.selectedTrail = trail.id;
+              persistSave();
+              updateUI();
+              renderShop();
+              return;
+            }
+
+            if (unlocked) {
+              state.selectedTrail = trail.id;
+              persistSave();
+              renderShop();
+            }
+          });
+
+          return card;
+        });
+
+        for (const card of trailCards) {
+          shopGrid.appendChild(card);
+        }
+      }
+
+      function gameLoop(timestamp) {
+        const delta = timestamp - state.lastTime || 16.67;
+        state.lastTime = timestamp;
+
+        update(delta);
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      window.addEventListener('keydown', (event) => {
+        if (event.code === 'ArrowUp' || event.code === 'KeyW') keys.up = true;
+        if (event.code === 'ArrowDown' || event.code === 'KeyS') keys.down = true;
+        if (event.code === 'ArrowLeft' || event.code === 'KeyA') keys.left = true;
+        if (event.code === 'ArrowRight' || event.code === 'KeyD') keys.right = true;
+
+        if (event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'KeyW') {
+          event.preventDefault();
+          startGame();
+        }
+      });
+
+      window.addEventListener('keyup', (event) => {
+        if (event.code === 'ArrowUp' || event.code === 'KeyW') keys.up = false;
+        if (event.code === 'ArrowDown' || event.code === 'KeyS') keys.down = false;
+        if (event.code === 'ArrowLeft' || event.code === 'KeyA') keys.left = false;
+        if (event.code === 'ArrowRight' || event.code === 'KeyD') keys.right = false;
+      });
+
+      canvas.addEventListener('pointermove', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseY = ((event.clientY - rect.top) / rect.height) * GAME_HEIGHT;
+        player.targetY = mouseY;
+      });
+
+      canvas.addEventListener('pointerdown', () => {
+        startGame();
+      });
+
+      updateUI();
+      renderShop();
+      resetGame();
+      requestAnimationFrame(gameLoop);
+    </script>
+  </body>
+</html>
